@@ -9,7 +9,7 @@ import { ChatApp } from './components/apps/ChatApp';
 import { WifiApp } from './components/apps/WifiApp';
 import { UpdateApp } from './components/apps/UpdateApp';
 import { INITIAL_STATS, EVENTS, RETRO_COLORS } from './constants';
-import { AppType, GameStatus, PlayerStats } from './types';
+import { AppType, GameStatus, PlayerStats, GameEvent } from './types';
 
 // Simple sound effects helper
 const playSound = (type: 'error' | 'success' | 'click' | 'alert') => {
@@ -27,17 +27,32 @@ const App: React.FC = () => {
   
   const timerRef = useRef<number | null>(null);
   const eventLoopRef = useRef<number | null>(null);
+  
+  // "Deck" of events to ensure we cycle through all of them
+  const eventDeckRef = useRef<GameEvent[]>([]);
+
+  // Fisher-Yates Shuffle
+  const shuffle = (array: GameEvent[]) => {
+      let currentIndex = array.length, randomIndex;
+      while (currentIndex !== 0) {
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex--;
+          [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+      }
+      return array;
+  };
 
   // --- Game Loop ---
   const startGame = () => {
     setStatus('PLAYING');
     setStats({ ...INITIAL_STATS });
+    eventDeckRef.current = shuffle([...EVENTS]);
     
-    // Spawn initial email
+    // Spawn initial email immediately
     setTimeout(() => {
         const initialEvent = EVENTS.find(e => e.id === 'work_email_meeting');
         if(initialEvent) openWindow(initialEvent.type, initialEvent.contentData, initialEvent.title);
-    }, 1000);
+    }, 500);
   };
 
   useEffect(() => {
@@ -59,26 +74,34 @@ const App: React.FC = () => {
     }, 1000);
 
     // 2. Event Spawner
+    // Check more frequently (every 3.5s) with a high chance (70%)
     eventLoopRef.current = window.setInterval(() => {
-      // 40% chance to spawn something every 3 seconds
-      if (Math.random() < 0.45) {
-        const randomEvent = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+      if (Math.random() < 0.7) {
         
-        // Handle "Spam Cluster" Logic (Event H)
-        if (randomEvent.id === 'distraction_spam_game') {
-            // Spawn 3 at once with slight offsets
-            for(let i=0; i<3; i++) {
-                 setTimeout(() => {
-                     openWindow(randomEvent.type, { ...randomEvent.contentData, eventId: randomEvent.id }, `${randomEvent.title} (${i+1})`);
-                 }, i * 200);
+        // Refill deck if empty to keep cycling
+        if (eventDeckRef.current.length === 0) {
+            eventDeckRef.current = shuffle([...EVENTS]);
+        }
+
+        const nextEvent = eventDeckRef.current.pop();
+
+        if (nextEvent) {
+             // Handle "Spam Cluster" Logic (Event H)
+            if (nextEvent.id === 'distraction_spam_game') {
+                // Spawn 3 at once with slight offsets
+                for(let i=0; i<3; i++) {
+                    setTimeout(() => {
+                        openWindow(nextEvent.type, { ...nextEvent.contentData, eventId: nextEvent.id }, `${nextEvent.title} (${i+1})`);
+                    }, i * 200);
+                }
+                playSound('alert');
+            } else {
+                openWindow(nextEvent.type, { ...nextEvent.contentData, eventId: nextEvent.id }, `${nextEvent.title}`);
+                playSound('click');
             }
-            playSound('alert');
-        } else {
-             openWindow(randomEvent.type, { ...randomEvent.contentData, eventId: randomEvent.id }, `${randomEvent.title}`);
-             playSound('click');
         }
       }
-    }, 4000);
+    }, 3500);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);

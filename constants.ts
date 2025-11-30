@@ -3,7 +3,7 @@ import { AppType, GameEvent } from './types';
 export const INITIAL_STATS = {
   sanity: 100,
   money: 5000,
-  time: 180, // Increased time for more events
+  time: 120, // Reduced to 2 minutes
   score: 0,
 };
 
