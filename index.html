@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cyber OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow: hidden;
+        user-select: none;
+      }
+      
+      /* Retro Scrollbar */
+      ::-webkit-scrollbar {
+        width: 16px;
+        background: #dfdfdf;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #dfdfdf;
+        border: 2px solid;
+        border-color: #fff #000 #000 #fff;
+      }
+      ::-webkit-scrollbar-button {
+        background: #dfdfdf;
+        border: 2px solid;
+        border-color: #fff #000 #000 #fff;
+        height: 16px;
+      }
+      
+      .retro-text {
+        font-family: 'VT323', monospace;
+      }
+
+      /* CRT Effect Overlay */
+      .scanlines {
+        background: linear-gradient(
+          to bottom,
+          rgba(255,255,255,0),
+          rgba(255,255,255,0) 50%,
+          rgba(0,0,0,0.1) 50%,
+          rgba(0,0,0,0.1)
+        );
+        background-size: 100% 4px;
+        position: fixed;
+        pointer-events: none;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 9999;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
